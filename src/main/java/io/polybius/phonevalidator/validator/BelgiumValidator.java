@@ -1,7 +1,6 @@
 package io.polybius.phonevalidator.validator;
 
 public class BelgiumValidator implements Validator{
-    public static final String CODE = "32";
     public static final String COUNTRY = "BE";
 
     @Override
@@ -11,11 +10,12 @@ public class BelgiumValidator implements Validator{
         if(phoneNumber.length() > 11)
             return false;
 
-        isValid = phoneNumber.substring(2).length() == 9 && (phoneNumber.substring(2).startsWith("456")
-                || phoneNumber.substring(2).startsWith("47")
-                || phoneNumber.substring(2).startsWith("48")
-                || phoneNumber.substring(2).startsWith("49"));
+        final String phoneNumberWithoutCode = phoneNumber.substring(2);
 
+        isValid = phoneNumberWithoutCode.length() == 9 && (phoneNumberWithoutCode.startsWith("456")
+                || phoneNumberWithoutCode.startsWith("47")
+                || phoneNumberWithoutCode.startsWith("48")
+                || phoneNumberWithoutCode.startsWith("49"));
 
         return isValid;
     }

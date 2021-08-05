@@ -1,5 +1,6 @@
 package io.polybius.phonevalidator;
 
+import io.polybius.phonevalidator.factory.ValidatorFactory;
 import io.polybius.phonevalidator.validator.*;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ public class MobilePhoneNumberValidator {
     result.invalidPhones = new ArrayList<>();
     result.validPhonesByCountry = new HashMap<>();
 
+    ValidatorFactory validatorFactory = new ValidatorFactory();
+
     for (int i = 0; i < phoneNumbers.size(); i++) {
       String phoneNumber = phoneNumbers.get(i);
       String phoneNormalized = PhoneUtil.normalize(phoneNumbers.get(i));
@@ -23,31 +26,21 @@ public class MobilePhoneNumberValidator {
         continue;
       }
 
-      Validator validator = null;
+      try {
+        Validator validator = validatorFactory.getValidator(phoneNormalized);
+        boolean isValid = validator.validate(phoneNormalized);
 
-      if(phoneNormalized.startsWith("370")) {
-        validator = new LithuaniaValidator();
-      } else if(phoneNormalized.startsWith("371")) {
-        validator = new LatviaValidator();
-      } else if(phoneNormalized.startsWith("32")) {
-        validator = new BelgiumValidator();
-      }else if(phoneNormalized.startsWith("372")) {
-        validator = new EstoniaValidator();
-      } else {
-        result.invalidPhones.add(phoneNumber);
-        continue;
-      }
+        if(isValid) {
 
-      boolean isValid = validator.validate(phoneNormalized);
+          if (!result.validPhonesByCountry.containsKey(validator.getCountryCode())) {
+            result.validPhonesByCountry.put(validator.getCountryCode(), new ArrayList<>());
+          }
 
-      if(isValid) {
-
-        if (!result.validPhonesByCountry.containsKey(validator.getCountryCode())) {
-          result.validPhonesByCountry.put(validator.getCountryCode(), new ArrayList<>());
+          result.validPhonesByCountry.get(validator.getCountryCode()).add(phoneNumber);
+        } else {
+          result.invalidPhones.add(phoneNumber);
         }
-
-        result.validPhonesByCountry.get(validator.getCountryCode()).add(phoneNumber);
-      } else {
+      } catch (IllegalArgumentException e) {
         result.invalidPhones.add(phoneNumber);
       }
 

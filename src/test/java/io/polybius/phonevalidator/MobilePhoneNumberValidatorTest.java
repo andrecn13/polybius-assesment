@@ -21,4 +21,16 @@ public class MobilePhoneNumberValidatorTest {
     result = validator.validate(List.of("+3706123456"));
     assertEquals(List.of("+3706123456"), result.invalidPhones);
   }
+
+  @Test
+  public void shouldValidateSuccessfullyBelgiumNumber() {
+    ValidationResultDto result = validator.validate(List.of("+32456123456"));
+    assertEquals(List.of("+32456123456"), result.validPhonesByCountry.get("BE"));
+
+    result = validator.validate(List.of("+32156123456"));
+    assertEquals(List.of("+32156123456"), result.invalidPhones);
+
+    result = validator.validate(List.of("+32506123456"));
+    assertEquals(List.of("+32506123456"), result.invalidPhones);
+  }
 }

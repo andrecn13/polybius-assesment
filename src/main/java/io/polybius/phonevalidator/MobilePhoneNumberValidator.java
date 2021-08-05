@@ -1,5 +1,7 @@
 package io.polybius.phonevalidator;
 
+import io.polybius.phonevalidator.validator.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,50 +11,47 @@ public class MobilePhoneNumberValidator {
     ValidationResultDto result = new ValidationResultDto();
     result.invalidPhones = new ArrayList<>();
     result.validPhonesByCountry = new HashMap<>();
+
     for (int i = 0; i < phoneNumbers.size(); i++) {
       String phoneNumber = phoneNumbers.get(i);
-      boolean isValid;
-      String country = null;
-      if(phoneNumber.startsWith("370")||phoneNumber.startsWith("+370")) {
-        country = "LT";
-        phoneNumber = phoneNumber.replaceAll("\\)", "").replaceAll("\\(", "").replaceAll(" ", "").replaceAll("-", "");
-        if (phoneNumber.startsWith("370")) {
-          isValid = phoneNumber.charAt(3) == '6' && phoneNumber.substring(3).length() == 8;
-        }else{
-          isValid = phoneNumber.charAt(4) == '6' && phoneNumber.substring(4).length() == 8;
-        }
-      } else if (phoneNumber.startsWith("+371") || phoneNumber.startsWith("371")) {
-        country = "LV";
-        if (phoneNumber.startsWith("370")) {
-          isValid = phoneNumber.charAt(3) == '2' && phoneNumber.substring(3).length() == 8;
-        }
-        else {
-          isValid = phoneNumber.charAt(4) == '2' && phoneNumber.substring(4).length() == 8;
-        }
-      } else if (phoneNumber.startsWith("372")) {
-        country = "EE";
-        phoneNumber = phoneNumber.replaceAll("\\)", "").replaceAll("\\(", "").replaceAll(" ", "").replaceAll("-", "");
-        if (phoneNumber.startsWith("+372")) {
-          isValid = phoneNumber.charAt(4) == '5' && (phoneNumber.substring(4).length() == 7
-              || phoneNumber.substring(4).length() == 8);
-        } else {
-          isValid = phoneNumber.charAt(3) == '5' && phoneNumber.substring(3).length() == 7;
-        }
-      } else {
-        isValid = false;
+      String phoneNormalized = PhoneUtil.normalize(phoneNumbers.get(i));
+
+      try {
+        Long.parseLong(phoneNormalized);
+      }catch(NumberFormatException e) {
+        result.invalidPhones.add(phoneNumber);
+        continue;
       }
 
-      if (isValid) {
-        if (!result.validPhonesByCountry.containsKey(country)) {
-          result.validPhonesByCountry.put(country, new ArrayList<>());
+      Validator validator = null;
+
+      if(phoneNormalized.startsWith("370")) {
+        validator = new LithuaniaValidator();
+      } else if(phoneNormalized.startsWith("371")) {
+        validator = new LatviaValidator();
+      } else if(phoneNormalized.startsWith("32")) {
+        validator = new BelgiumValidator();
+      }else if(phoneNormalized.startsWith("372")) {
+        validator = new EstoniaValidator();
+      } else {
+        result.invalidPhones.add(phoneNumber);
+        continue;
+      }
+
+      boolean isValid = validator.validate(phoneNormalized);
+
+      if(isValid) {
+
+        if (!result.validPhonesByCountry.containsKey(validator.getCountryCode())) {
+          result.validPhonesByCountry.put(validator.getCountryCode(), new ArrayList<>());
         }
 
-        result.validPhonesByCountry.get(country).add(phoneNumbers.get(0));
+        result.validPhonesByCountry.get(validator.getCountryCode()).add(phoneNumber);
       } else {
-        result.invalidPhones.add(phoneNumbers.get(i));
+        result.invalidPhones.add(phoneNumber);
       }
+
     }
-
 
     return result;
   }

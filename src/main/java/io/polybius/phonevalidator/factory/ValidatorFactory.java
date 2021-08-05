@@ -5,21 +5,20 @@ import io.polybius.phonevalidator.validator.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ValidatorFactory {
 
-    final static Map<CountryCodeEnum, Supplier<Validator>> availableValidators = new HashMap<>();
+    final static Map<CountryCodeEnum, Validator> availableValidators = new HashMap<>();
 
     static {
-        availableValidators.put(CountryCodeEnum.LITHUANIA, LithuaniaValidator::new);
-        availableValidators.put(CountryCodeEnum.LATVIA, LatviaValidator::new);
-        availableValidators.put(CountryCodeEnum.ESTONIA, EstoniaValidator::new);
-        availableValidators.put(CountryCodeEnum.BELGIUM, BelgiumValidator::new);
+        availableValidators.put(CountryCodeEnum.LITHUANIA, new LithuaniaValidator());
+        availableValidators.put(CountryCodeEnum.LATVIA, new LatviaValidator());
+        availableValidators.put(CountryCodeEnum.ESTONIA, new EstoniaValidator());
+        availableValidators.put(CountryCodeEnum.BELGIUM, new BelgiumValidator());
     }
 
     public Validator getValidator(String phoneNormalized) {
-        Supplier<Validator> validatorSupplier = null;
+        Validator validatorSupplier = null;
 
         if(phoneNormalized.startsWith(CountryCodeEnum.LITHUANIA.getCountryCode())) {
             validatorSupplier = availableValidators.get(CountryCodeEnum.LITHUANIA);
@@ -34,6 +33,6 @@ public class ValidatorFactory {
         if (null == validatorSupplier)
             throw new IllegalArgumentException("No such validator available for number: " + phoneNormalized);
 
-        return validatorSupplier.get();
+        return validatorSupplier;
     }
 }

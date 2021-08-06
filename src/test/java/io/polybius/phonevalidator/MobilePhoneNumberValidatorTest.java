@@ -40,15 +40,34 @@ public class MobilePhoneNumberValidatorTest {
   }
 
   @Test
+  public void shouldReturnInvalidPhonesListWhenBelgiumNumberWrongFormat() {
+    List<String> phoneNumbers = List.of("+3212345678", "3212345678", "+32 12345678",
+            "32 12345678", "32 123", "32 678", "+32ABC", "ABC", "()", "+32(61234567", "+324734567892");
+
+    ValidationResultDto result = validator.validate(phoneNumbers);
+
+    assertNotNull(result);
+    assertNotNull(result.validPhonesByCountry);
+    assertNotNull(result.invalidPhones);
+    assertEquals(11, result.invalidPhones.size());
+    assertEquals(0, result.validPhonesByCountry.size());
+    assertEquals(phoneNumbers, result.invalidPhones);
+  }
+
+  @Test
   public void shouldValidateSuccessfullyBelgiumNumber() {
-    ValidationResultDto result = validator.validate(List.of("+32456123456"));
-    assertEquals(List.of("+32456123456"), result.validPhonesByCountry.get("BE"));
+    List<String> phoneNumbers = List.of("32456123456", "+32456123456", "32 456123456",
+            "+3245612 34 56", "+32 (4)56123456", "+32 456 123 456", "+32-456-123-456");
 
-    result = validator.validate(List.of("+32156123456"));
-    assertEquals(List.of("+32156123456"), result.invalidPhones);
+    ValidationResultDto result = validator.validate(phoneNumbers);
 
-    result = validator.validate(List.of("+32506123456"));
-    assertEquals(List.of("+32506123456"), result.invalidPhones);
+    assertNotNull(result);
+    assertNotNull(result.validPhonesByCountry);
+    assertNotNull(result.validPhonesByCountry.get("BE"));
+    assertNotNull(result.invalidPhones);
+    assertEquals(1, result.validPhonesByCountry.size());
+    assertEquals(7, result.validPhonesByCountry.get("BE").size());
+    assertEquals(0, result.invalidPhones.size());
   }
 
   @Test
@@ -131,7 +150,7 @@ public class MobilePhoneNumberValidatorTest {
   @Test
   public void shouldValidateSuccessfullyEstoniaNumber() {
     List<String> phoneNumbers = List.of("37251234567", "+37251234567", "372 51234567",
-            "+372 51234567", "+372(5)1234567", "+372 512 34 567", "+372-512-34-567");
+            "+372 51234567", "+372(5)1234567", "+372 512 34 567", "+372-512-34-567", "3725123456");
 
     ValidationResultDto result = validator.validate(phoneNumbers);
 
@@ -140,7 +159,7 @@ public class MobilePhoneNumberValidatorTest {
     assertNotNull(result.validPhonesByCountry.get("EE"));
     assertNotNull(result.invalidPhones);
     assertEquals(1, result.validPhonesByCountry.size());
-    assertEquals(7, result.validPhonesByCountry.get("EE").size());
+    assertEquals(8, result.validPhonesByCountry.get("EE").size());
     assertEquals(0, result.invalidPhones.size());
 
   }

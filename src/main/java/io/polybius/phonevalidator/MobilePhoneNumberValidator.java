@@ -20,15 +20,10 @@ public class MobilePhoneNumberValidator {
       String phoneNormalized = PhoneUtil.normalize(phoneNumbers.get(i));
 
       try {
-        Long.parseLong(phoneNormalized);
-      }catch(NumberFormatException e) {
-        result.invalidPhones.add(phoneNumber);
-        continue;
-      }
-
-      try {
         Validator validator = validatorFactory.getValidator(phoneNormalized);
-        boolean isValid = validator.validate(phoneNormalized);
+        boolean isValid = PhoneUtil.isBraceBalanced(phoneNumber)
+                && PhoneUtil.isPhoneNumberValid(phoneNormalized)
+                && validator.validate(phoneNormalized);
 
         if(isValid) {
 
@@ -48,4 +43,5 @@ public class MobilePhoneNumberValidator {
 
     return result;
   }
+
 }

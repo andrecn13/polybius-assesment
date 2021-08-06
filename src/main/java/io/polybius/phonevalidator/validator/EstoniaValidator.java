@@ -6,7 +6,7 @@ public class EstoniaValidator implements Validator{
     @Override
     public boolean validate(String phoneNumber) {
 
-        return phoneNumber.charAt(4) == '5' && (phoneNumber.substring(4).length() == 7
+        return phoneNumber.charAt(3) == '5' && (phoneNumber.substring(4).length() == 7
                 || phoneNumber.substring(4).length() == 8);
     }
 
